@@ -23,9 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-k2mq7+#9+&#*%m_6t^4kou)gzng!u#4^u_n-vy=ybvpqwf^5&^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com", "offerwise.onrender.com"]
+DEBUG = False  # for production
+ALLOWED_HOSTS = ["localhost", ".onrender.com"]
 
 # CSRF for HTTPS on Render
 CSRF_TRUSTED_ORIGINS = [
