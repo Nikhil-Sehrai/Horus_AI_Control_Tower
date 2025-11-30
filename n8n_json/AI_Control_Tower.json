@@ -1,0 +1,338 @@
+{
+  "name": "AI_Control_Tower",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5b112271-fa6b-43ee-b7d6-0828dac42072",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite-preview-09-2025",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        624,
+        192
+      ],
+      "id": "6c337d3f-104c-4835-8d06-bd6bb730fbc8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "s6dliMfSx7TqvB4W",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Trigger Node\nCan be changed to a scheduled trigger node",
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        160
+      ],
+      "id": "bf098ac5-1bab-4311-ae29-798ee043122a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Read all rows from previous node\nconst items = $input.all();\n\n// Helpers\nfunction toNum(v) {\n  const n = parseFloat(v);\n  return isNaN(n) ? 0 : n;\n}\n\nlet total = items.length;\n\nlet sumDelayProb = 0;\nlet sumRouteRisk = 0;\nlet sumDisruption = 0;\n\nconst highRiskShipments = [];\nconst supplierStats = {};\nconst lowInventoryAlerts = [];\n\nfor (const item of items) {\n  const r = item.json;\n\n  const warehouseInventory = toNum(r.warehouse_inventory_level);\n  const handlingEquip = toNum(r.handling_equipment_availability);\n  const orderFulfillment = toNum(r.order_fulfillment_status);\n  const weatherSeverity = toNum(r.weather_condition_severity);\n  const shippingCosts = toNum(r.shipping_costs);\n  const supplierReliability = toNum(r.supplier_reliability_score);\n  const leadTime = toNum(r.lead_time_days);\n  const historicalDemand = toNum(r.historical_demand);\n  const cargoStatus = toNum(r.cargo_condition_status);\n  const routeRisk = toNum(r.route_risk_level);\n  const customsTime = toNum(r.customs_clearance_time);\n  const disruptionRisk = toNum(r.disruption_likelihood_score);\n  const delayProb = toNum(r.delay_probability);\n  const deliveryDeviation = toNum(r.delivery_time_deviation);\n  const riskClass = r.risk_classification;\n  const productId = r.product_id;\n  const supplierId = r.supplier_id;\n  const supplierCountry = r.supplier_country;\n\n  // Overall averages\n  sumDelayProb += delayProb;\n  sumRouteRisk += routeRisk;\n  sumDisruption += disruptionRisk;\n\n  // --- High-risk shipments (for \"routeRisks\") ---\n  if (riskClass === 'High Risk' || delayProb > 0.7 || routeRisk > 0.7) {\n    highRiskShipments.push({\n      productId,\n      supplierId,\n      supplierCountry,\n      riskClass,\n      delayProbability: delayProb,\n      routeRiskLevel: routeRisk,\n      disruptionLikelihood: disruptionRisk,\n      deliveryTimeDeviation: deliveryDeviation,\n      shippingCosts,\n    });\n  }\n\n  // --- Supplier performance ---\n  if (!supplierStats[supplierId]) {\n    supplierStats[supplierId] = {\n      supplierId,\n      supplierCountry,\n      totalShipments: 0,\n      sumDelayProb: 0,\n      sumReliability: 0,\n      sumDeliveryDeviation: 0,\n    };\n  }\n  supplierStats[supplierId].totalShipments += 1;\n  supplierStats[supplierId].sumDelayProb += delayProb;\n  supplierStats[supplierId].sumReliability += supplierReliability;\n  supplierStats[supplierId].sumDeliveryDeviation += deliveryDeviation;\n\n  // --- Inventory risk (potential stockout) ---\n  // crude logic: if inventory < 1.0 * historical demand → risk of stockout\n  if (historicalDemand > 0) {\n    const coverageRatio = warehouseInventory / historicalDemand;\n    if (coverageRatio < 1.0) {\n      lowInventoryAlerts.push({\n        warehouseInventory,\n        historicalDemand,\n        coverageRatio,\n        productId,\n        supplierId,\n        supplierCountry,\n        orderFulfillmentStatus: orderFulfillment,\n      });\n    }\n  }\n}\n\n// Aggregate suppliers\nconst supplierArray = Object.values(supplierStats).map(s => {\n  return {\n    supplierId: s.supplierId,\n    supplierCountry: s.supplierCountry,\n    avgDelayProbability: s.sumDelayProb / s.totalShipments,\n    avgReliabilityScore: s.sumReliability / s.totalShipments,\n    avgDeliveryDeviation: s.sumDeliveryDeviation / s.totalShipments,\n    totalShipments: s.totalShipments,\n  };\n});\n\n// Sort and trim lists for the agent\nhighRiskShipments.sort((a, b) => (b.delayProbability + b.routeRiskLevel) - (a.delayProbability + a.routeRiskLevel));\nconst topHighRiskShipments = highRiskShipments.slice(0, 10);\n\nsupplierArray.sort((a, b) => {\n  // higher risk = higher delay, lower reliability, more deviation\n  const scoreA = a.avgDelayProbability + (1 - a.avgReliabilityScore) + a.avgDeliveryDeviation;\n  const scoreB = b.avgDelayProbability + (1 - b.avgReliabilityScore) + b.avgDeliveryDeviation;\n  return scoreB - scoreA;\n});\nconst topHighRiskSuppliers = supplierArray.slice(0, 5);\n\n// Sort low inventory by coverage increasing\nlowInventoryAlerts.sort((a, b) => a.coverageRatio - b.coverageRatio);\nconst topLowInventoryAlerts = lowInventoryAlerts.slice(0, 10);\n\n// Summary metrics\nconst summaryMetrics = {\n  totalRecords: total,\n  avgDelayProbability: total ? sumDelayProb / total : 0,\n  avgRouteRiskLevel: total ? sumRouteRisk / total : 0,\n  avgDisruptionLikelihood: total ? sumDisruption / total : 0,\n  highRiskShipmentCount: highRiskShipments.length,\n  highRiskSupplierCount: topHighRiskSuppliers.length,\n  lowInventoryAlertCount: lowInventoryAlerts.length,\n};\n\n// Return ONE item to make life easy for the AI node\nreturn [\n  {\n    json: {\n      summaryMetrics,\n      topHighRiskShipments,\n      topHighRiskSuppliers,\n      topLowInventoryAlerts,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "1bd80ad3-a8eb-49d3-b8cd-7185a43daed7",
+      "name": "Code in JS to create Metrics"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}\n",
+        "options": {
+          "systemMessage": "You are a helpful assistant. You are an Autonomous Supply Chain Control Tower AI for a global company.\n\nYou receive JSON with:\n- summaryMetrics: aggregated KPIs (delay probability, disruption risk, route risk)\n- topHighRiskShipments: shipments with high delay/risk/disruption values\n- topHighRiskSuppliers: suppliers with high delays, low reliability, or high deviation\n- topLowInventoryAlerts: products with low inventory coverage (risk of stockout)\n\nYour tasks:\n1. Detect critical risks (operational, logistics, supplier, inventory).\n2. Produce short executive summaries.\n3. Recommend clear operational actions.\n4. Base all reasoning ONLY on the input JSON.\n\nVERY IMPORTANT:\nYou must respond *only* with valid JSON in this schema:\n\n{\n  \"executiveSummary\": [\"string\", \"string\"],\n  \"routeRisks\": [\n    { \"label\": \"string\", \"issue\": \"string\", \"recommendation\": \"string\" }\n  ],\n  \"supplierRisks\": [\n    { \"supplierId\": \"string\", \"issue\": \"string\", \"recommendation\": \"string\" }\n  ],\n  \"inventoryRisks\": [\n    { \"productId\": \"string\", \"issue\": \"string\", \"recommendation\": \"string\" }\n  ],\n  \"globalRecommendations\": [\"string\", \"string\"]\n}\n\nDo NOT include explanations, markdown, or code fences. Return ONLY the JSON above.\nistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "b67b5d11-7692-457c-b075-8ecb984d12f8",
+      "name": "Horus Engine"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 1. Read raw JSON string from the Agent\n// In your screenshot the field name is \"output\"\nlet raw = $json.output || $json.text || $json.result || '';\n\nraw = String(raw).trim();\n\n// Remove possible ```json fences\nraw = raw.replace(/^```json/i, '')\n         .replace(/^```/i, '')\n         .replace(/```$/i, '')\n         .trim();\n\n// 2. Parse JSON text into an object\nlet data;\ntry {\n  data = JSON.parse(raw);\n} catch (err) {\n  throw new Error('Failed to parse Agent JSON: ' + err.message + '\\nRaw:\\n' + raw);\n}\n\n// 3. Extract lists (with safe fallbacks)\nconst exec = data.executiveSummary || [];\nconst routeRisks = data.routeRisks || [];\nconst supplierRisks = data.supplierRisks || [];\nconst invRisks = data.inventoryRisks || [];\nconst globalRecs = data.globalRecommendations || [];\n\n// 4. Build subject + HTML body\nconst subject = `SCM Control Tower Alert – Daily Risk Report`;\n\nconst htmlBody = `\n<h2>Autonomous SCM Control Tower – Daily Risk Report</h2>\n\n<p><b>Executive Summary:</b></p>\n<ul>\n${exec.map(e => `<li>${e}</li>`).join('')}\n</ul>\n\n<p><b>Top Route / Shipment Risks:</b></p>\n<ol>\n${routeRisks.map(r => `<li><b>${r.label}</b>: ${r.issue} – <b>Action:</b> ${r.recommendation}</li>`).join('')}\n</ol>\n\n<p><b>Top Supplier Risks:</b></p>\n<ol>\n${supplierRisks.map(s => `<li><b>${s.supplierId}</b>: ${s.issue} – <b>Action:</b> ${s.recommendation}</li>`).join('')}\n</ol>\n\n<p><b>Inventory Risks (Stockout Risk SKUs):</b></p>\n<ul>\n${invRisks.map(i => `<li><b>${i.productId}</b>: ${i.issue} – <b>Action:</b> ${i.recommendation}</li>`).join('')}\n</ul>\n\n<p><b>Global Recommendations:</b></p>\n<ul>\n${globalRecs.map(g => `<li>${g}</li>`).join('')}\n</ul>\n\n<p><i>This alert was generated automatically by a Gemini 2.5 Flash agentic workflow in n8n.</i></p>\n`;\n\n// 5. IMPORTANT: in \"Run once for each item\" mode you must return *one object*, not an array\nreturn {\n  json: {\n    executiveSummary: exec,\n    routeRisks,\n    supplierRisks,\n    inventoryRisks: invRisks,\n    globalRecommendations: globalRecs,\n    subject,\n    htmlBody,\n  },\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "4541ff6b-1cf1-479a-ba3b-f2e0b2cc0cfd",
+      "name": "code to parse json to html"
+    },
+    {
+      "parameters": {
+        "sendTo": "nikhil.sehrai@mba.christuniversity.in",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.htmlBody }}",
+        "options": {
+          "bccList": "kshama.bhat@mba.christuniversity.in",
+          "ccList": "ns.shalinie@mba.christuniversity.in"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "36f13b1e-5975-4de2-92ef-fe5c54bd043a",
+      "name": "Notify stakeholders",
+      "webhookId": "41270f79-47ef-4c9d-a5b4-073ca330a0a0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qmSL1F0z1FBaQKRw",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1PnhJxYZqpoTKMnzJl7QAEYDreyxW0EvkrWVsprCg0zE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PnhJxYZqpoTKMnzJl7QAEYDreyxW0EvkrWVsprCg0zE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now }}",
+            "summary": "={{ $json.executiveSummary[0] }}",
+            "routeRisks": "={{ $json.routeRisks.length }}",
+            "supplierRisks": "={{ $json.supplierRisks.length\n }}",
+            "inventoryRisks": "={{ $json.inventoryRisks.length\n }}",
+            "globalRecommendations": "={{ $json.globalRecommendations.length }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "routeRisks",
+              "displayName": "routeRisks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "supplierRisks",
+              "displayName": "supplierRisks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "inventoryRisks",
+              "displayName": "inventoryRisks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "globalRecommendations",
+              "displayName": "globalRecommendations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        208
+      ],
+      "id": "2f9a5de5-e211-40af-a033-694f81cf52f9",
+      "name": "Log execution",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "NUWY7uut40PjCZZi",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1aSZ_hTChe9OmxTGuAByzKMn4s61wikT8Ke8A7tOXRaw",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 558445981,
+          "mode": "list",
+          "cachedResultName": "dynamic_supply_chain_logistics_dataset_with_country",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aSZ_hTChe9OmxTGuAByzKMn4s61wikT8Ke8A7tOXRaw/edit#gid=558445981"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b13a0599-342a-4387-8390-bb96bc8adedc",
+      "name": "Read the data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "NUWY7uut40PjCZZi",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read the data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Horus Engine",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JS to create Metrics": {
+      "main": [
+        [
+          {
+            "node": "Horus Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Horus Engine": {
+      "main": [
+        [
+          {
+            "node": "code to parse json to html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "code to parse json to html": {
+      "main": [
+        [
+          {
+            "node": "Notify stakeholders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read the data": {
+      "main": [
+        [
+          {
+            "node": "Code in JS to create Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6a33089e-280b-4a1a-88af-02a58d173abd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5ac7efc706bb89f20833a7022338c2af366e6342352245c9259a583c99b1a30f"
+  },
+  "id": "TpjjvQNfVe3h5mmu",
+  "tags": []
+}
