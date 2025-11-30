@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horus Control Tower</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    body {
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    .navbar-brand span {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+    .hero {
+      background: radial-gradient(circle at top left, #22c55e33, transparent 55%),
+                  radial-gradient(circle at bottom right, #22d3ee33, transparent 55%);
+      border-radius: 1.75rem;
+      padding: 3rem 2.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.9);
+    }
+    .badge-pulse {
+      position: relative;
+      overflow: hidden;
+    }
+    .badge-pulse::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(248, 250, 252, 0.35);
+      transform: scale(1.05);
+      opacity: 0;
+      animation: pulse 2.6s infinite;
+    }
+    @keyframes pulse {
+      0% {opacity: 0.4; transform: scale(1.05);} 
+      70% {opacity: 0; transform: scale(1.14);} 
+      100% {opacity: 0; transform: scale(1.14);} 
+    }
+    .kpi-card {
+      border-radius: 1.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: linear-gradient(145deg, rgba(15,23,42,0.96), rgba(30,64,175,0.4));
+      height: 100%;
+    }
+    .kpi-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    .pill {
+      border-radius: 999px;
+      padding: 0.35rem 0.85rem;
+      background: rgba(15,23,42,0.85);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+    .flow-card {
+      border-radius: 1.25rem;
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .node-pill {
+      border-radius: 999px;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+    .node-arrow {
+      font-size: 1.2rem;
+      opacity: 0.6;
+    }
+    .btn-glow-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border: none;
+      box-shadow: 0 12px 30px rgba(34, 197, 94, 0.35);
+    }
+    .btn-glow-primary:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 18px 40px rgba(34, 197, 94, 0.55);
+    }
+    .btn-outline-soft {
+      border-radius: 999px !important;
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      color: #e5e7eb;
+    }
+    .btn-outline-soft:hover {
+      background: rgba(148, 163, 184, 0.1);
+      color: #f9fafb;
+    }
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark border-bottom border-secondary border-opacity-50" style="background: radial-gradient(circle at top left, rgba(15,23,42,0.98), rgba(15,23,42,0.98));">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <span class="fs-4">🦉</span>
+        <div class="d-flex flex-column lh-1">
+          <strong>Horus</strong>
+          <span>AI Control Tower</span>
+        </div>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+          <li class="nav-item mx-lg-1"><a class="nav-link active" href="index.html">Dashboard</a></li>
+          <li class="nav-item mx-lg-1"><a class="nav-link" href="data.html">Data</a></li>
+          <li class="nav-item mx-lg-1"><a class="nav-link" href="update.html">Update</a></li>
+          <li class="nav-item mx-lg-1 mt-2 mt-lg-0">
+            <a class="btn btn-sm btn-outline-soft" href="problem.html">
+              <i class="bi bi-lightning-charge me-1"></i>
+              Concept Deck
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-5">
+    <div class="row g-4 align-items-stretch">
+      <!-- Hero & copy -->
+      <div class="col-lg-7">
+        <section class="hero h-100 d-flex flex-column justify-content-between">
+          <div>
+            <span class="badge bg-success-subtle text-success-emphasis mb-3 badge-pulse">
+              <i class="bi bi-activity me-1"></i> Live OTIF / DSA risk monitoring
+            </span>
+            <h1 class="display-5 fw-semibold text-white mb-3">Autonomous AI Supply Chain Control Tower</h1>
+            <p class="fs-6 text-light text-opacity-75 mb-4">
+              Horus continuously ingests logistics & inventory data, detects anomalies like delays and stockouts,
+              and uses an agentic AI brain to recommend or trigger self-healing actions across your global network.
+            </p>
+
+            <div class="d-flex flex-wrap gap-3 mb-4">
+              <a href="data.html" class="btn btn-glow-primary px-4 py-2 rounded-pill">
+                <i class="bi bi-kanban me-2"></i>
+                Open Control Tower
+              </a>
+              <a href="problem.html" class="btn btn-outline-soft px-4 py-2">
+                <i class="bi bi-file-earmark-text me-2"></i>
+                View Concept & Problem Statement
+              </a>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3">
+              <span class="pill"><i class="bi bi-arrow-repeat me-1"></i> Continuous ingestion</span>
+              <span class="pill"><i class="bi bi-bullseye me-1"></i> Anomaly detection</span>
+              <span class="pill"><i class="bi bi-cpu me-1"></i> Agentic reasoning</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-top border-secondary border-opacity-50 small text-secondary">
+            <span class="me-3"><i class="bi bi-diagram-3 me-1"></i> n8n Orchestration</span>
+            <span class="me-3"><i class="bi bi-google me-1"></i> Google Sheets Data Lake</span>
+            <span><i class="bi bi-robot me-1"></i> LLM: Horus Engine (Gemini)</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- KPIs & workflow -->
+      <div class="col-lg-5 d-flex flex-column gap-4">
+        <section>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="section-title">Live health snapshot</span>
+            <span class="text-secondary small"><i class="bi bi-clock-history me-1"></i>Updated every run</span>
+          </div>
+          <div class="row g-3">
+            <div class="col-12 col-sm-4">
+              <div class="kpi-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-secondary small">OTIF</span>
+                  <i class="bi bi-truck fs-5 text-success"></i>
+                </div>
+                <div class="kpi-value">96.4%</div>
+                <div class="small text-secondary">Target &gt; 95%</div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-4">
+              <div class="kpi-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-secondary small">DSA</span>
+                  <i class="bi bi-calendar-check fs-5 text-info"></i>
+                </div>
+                <div class="kpi-value">92.1%</div>
+                <div class="small text-secondary">Schedule adherence</div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-4">
+              <div class="kpi-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-secondary small">Alerts</span>
+                  <i class="bi bi-exclamation-octagon fs-5 text-warning"></i>
+                </div>
+                <div class="kpi-value">8</div>
+                <div class="small text-secondary">Open risks today</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="d-flex justify-content-between align-items-center mb-2 mt-3">
+            <span class="section-title">Horus workflow</span>
+            <span class="text-secondary small"><i class="bi bi-diagram-2 me-1"></i>Powered by n8n</span>
+          </div>
+          <div class="flow-card p-3">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+              <span class="node-pill"><i class="bi bi-mouse me-1"></i> Trigger</span>
+              <span class="node-arrow"><i class="bi bi-arrow-right"></i></span>
+              <span class="node-pill"><i class="bi bi-google me-1"></i> Read Sheet</span>
+              <span class="node-arrow"><i class="bi bi-arrow-right"></i></span>
+              <span class="node-pill"><i class="bi bi-braces-asterisk me-1"></i> JS Metrics</span>
+              <span class="node-arrow d-none d-xl-inline"><i class="bi bi-arrow-right"></i></span>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+              <span class="node-pill"><i class="bi bi-robot me-1"></i> Horus Engine</span>
+              <span class="node-arrow"><i class="bi bi-arrow-right"></i></span>
+              <span class="node-pill"><i class="bi bi-code-slash me-1"></i> JSON → HTML</span>
+              <span class="node-arrow"><i class="bi bi-arrow-right"></i></span>
+              <span class="node-pill"><i class="bi bi-envelope-paper me-1"></i> Notify Stakeholders</span>
+              <span class="node-arrow"><i class="bi bi-arrow-right"></i></span>
+              <span class="node-pill"><i class="bi bi-table me-1"></i> Log Execution</span>
+            </div>
+            <p class="small text-secondary mb-0 mt-2">
+              Every execution reads the latest Google Sheets data, computes metrics, lets the Horus AI Agent reason about
+              root causes, and then emails a rich HTML summary while logging all actions back to the control sheet.
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-top border-secondary border-opacity-50 py-3 small text-center text-secondary">
+    Built for autonomous, self-healing supply chains · Horus Control Tower
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
