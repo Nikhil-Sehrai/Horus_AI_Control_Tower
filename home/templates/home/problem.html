@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Horus – Concept & Problem Statement</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    .navbar {
+      background: #0f172a;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #94a3b8;
+    }
+    .card-surface {
+      border-radius: 1.25rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.96);
+      padding: 1.5rem;
+    }
+    .highlight {
+      border-left: 4px solid #22c55e;
+      padding-left: 1rem;
+    }
+    code {
+      color: #22d3ee;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar navbar-expand-lg navbar-dark px-4">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+      <span class="fs-4">🦉</span>
+      <div class="lh-1">
+        <strong>Horus</strong><br />
+        <span class="small text-secondary">AI Control Tower</span>
+      </div>
+    </a>
+  </nav>
+
+  <main class="container py-5">
+
+    <!-- Title -->
+    <div class="mb-5">
+      <h1 class="display-5 fw-bold text-white">Concept & Problem Statement</h1>
+      <p class="lead text-secondary">
+        Understanding the real-world challenge Horus solves and why an Autonomous AI Control Tower is needed.
+      </p>
+    </div>
+
+    <!-- Solution Title -->
+    <div class="card-surface mb-5">
+      <h3 class="text-white mb-3">
+        1️⃣ Title of Solution
+      </h3>
+      <p class="fs-5 fw-semibold text-success">
+        Horus — Autonomous AI Supply Chain Control Tower for Real-Time Risk Detection & Self-Healing Actions
+      </p>
+    </div>
+
+    <!-- Real World Problem -->
+    <div class="card-surface mb-5">
+      <h3 class="text-white mb-3">2️⃣ Real-World Problem</h3>
+
+      <div class="highlight mb-4">
+        <h5 class="text-white">Fragmented Networks</h5>
+        <p class="text-secondary">
+          Organizations operate across multiple warehouses, regional hubs, suppliers, and logistics partners.
+          Each produces siloed data that is rarely unified in real-time.
+        </p>
+      </div>
+
+      <div class="highlight mb-4">
+        <h5 class="text-white">Operational Vulnerability</h5>
+        <p class="text-secondary">
+          Delays, low inventory, unreliable suppliers, geopolitical disruptions, and seasonal demand spikes create
+          volatility across OTIF and DSA.
+        </p>
+      </div>
+
+      <div class="highlight mb-4">
+        <h5 class="text-white">Manual, Reactive Decision Making</h5>
+        <p class="text-secondary">
+          Most companies rely on static dashboards, manual root-cause analysis, and reactive firefighting.
+          Planners cannot manually monitor thousands of orders and lanes in real time.
+        </p>
+      </div>
+    </div>
+
+    <!-- Problem Statement -->
+    <div class="card-surface mb-5">
+      <h3 class="text-white mb-3">3️⃣ Problem Statement</h3>
+
+      <pre class="bg-dark p-3 rounded text-white" style="white-space: pre-wrap;">
+Problem:
+Our supply chain spans multiple warehouses, regions, and suppliers with thousands of orders.
+Currently, monitoring disruptions like delays, low inventory, and poor supplier performance 
+is manual, reactive, and fragmented across spreadsheets and dashboards.
+This leads to stockouts, excess safety stock, and delayed responses to risks.
+
+Goal:
+Build an Autonomous AI Control Tower using Agentic AI + n8n that:
+1. Continuously ingests logistics & inventory data
+2. Detects anomalies & risks (delays, stockouts, risky suppliers)
+3. Uses an AI Agent to reason about root causes
+4. Generates proactive recommendations or self-healing actions
+5. Automatically notifies stakeholders with clean, actionable summaries
+      </pre>
+    </div>
+
+    <!-- Concept -->
+    <div class="card-surface mb-5">
+      <h3 class="text-white mb-3">4️⃣ Core Concept — What Horus Does</h3>
+
+      <ul class="text-secondary">
+        <li><strong class="text-white">Continuously ingest</strong> logistics, shipment, and inventory data</li>
+        <li><strong class="text-white">Detect anomalies & risks</strong> across lanes, suppliers, and SKUs</li>
+        <li><strong class="text-white">Perform agentic AI reasoning</strong> for root-cause detection</li>
+        <li><strong class="text-white">Recommend or trigger self-healing actions</strong></li>
+        <li><strong class="text-white">Generate automated briefings</strong> with KPIs, risks, and actions</li>
+      </ul>
+    </div>
+
+    <!-- Why Autonomous -->
+    <div class="card-surface mb-5">
+      <h3 class="text-white mb-3">5️⃣ Why an Autonomous Control Tower?</h3>
+
+      <p class="text-secondary">
+        Traditional dashboards help you *look* at data — they do not monitor, analyze, or act.
+        Horus transforms the supply chain from a reactive system into a proactive, intelligent operator.
+      </p>
+
+      <ul class="text-secondary">
+        <li>Faster disruption response</li>
+        <li>Reduced stockouts and overstocks</li>
+        <li>Higher OTIF & DSA stability</li>
+        <li>Proactive mitigation instead of reactive firefighting</li>
+        <li>Human planners focus on strategy, not manual monitoring</li>
+      </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="card-surface mb-5">
+      <h3 class="text-white mb-3">6️⃣ Summary</h3>
+
+      <table class="table table-dark table-bordered mb-0">
+        <thead>
+          <tr>
+            <th>Old World</th>
+            <th>New World (Horus)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Manual dashboards</td>
+            <td>Autonomous monitoring</td>
+          </tr>
+          <tr>
+            <td>Human scanning for problems</td>
+            <td>AI agents detecting risks</td>
+          </tr>
+          <tr>
+            <td>Late reactions</td>
+            <td>Real-time alerts</td>
+          </tr>
+          <tr>
+            <td>Siloed data</td>
+            <td>Unified control tower</td>
+          </tr>
+          <tr>
+            <td>Decisions after impact</td>
+            <td>Preventive & self-healing actions</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

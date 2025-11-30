@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Horus Control Tower – Hardcoded Snapshot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap & Icons -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+  />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    .navbar {
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.98));
+      border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+    }
+    .navbar-brand span.sub {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.7rem;
+      color: #9ca3af;
+    }
+    .hero {
+      background: radial-gradient(circle at top left, #22c55e33, transparent 55%),
+                  radial-gradient(circle at bottom right, #22d3ee33, transparent 55%);
+      border-radius: 1.75rem;
+      padding: 1.75rem 1.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.9);
+    }
+    .kpi-card {
+      border-radius: 1.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: linear-gradient(145deg, rgba(15,23,42,0.96), rgba(30,64,175,0.5));
+      height: 100%;
+    }
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9ca3af;
+    }
+    .card-surface {
+      border-radius: 1.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.96);
+    }
+    table thead tr {
+      background-color: #020617;
+    }
+    table thead th {
+      color: #e5e7eb;
+    }
+    table tbody tr:nth-child(odd) {
+      background-color: #020617;
+    }
+    table tbody tr:nth-child(even) {
+      background-color: #0b1220;
+    }
+    table td, table th {
+      color: #e5e7eb;
+      font-size: 0.8rem;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <span class="fs-4">🦉</span>
+        <div class="lh-1">
+          <div class="fw-bold">Horus</div>
+          <span class="sub">AI Control Tower</span>
+        </div>
+      </a>
+      <span class="text-secondary small">
+        <i class="bi bi-database-check me-1"></i> Snapshot from logistics dataset
+      </span>
+    </div>
+  </nav>
+
+  <main class="container-fluid px-4 py-4">
+    <!-- TOP ROW -->
+    <div class="row g-4 align-items-stretch mb-3">
+      <div class="col-lg-5">
+        <section class="hero h-100">
+          <h1 class="h3 text-white mb-3">
+            Supply Chain Risk Dashboard – Static Snapshot
+          </h1>
+          <p class="small mb-3 text-light text-opacity-75">
+            This view is developed from the live dynamic supply chain
+            logistics dataset. It gives a snapshot of inventory, delay risk and
+            high-risk exposures by supplier and route.
+          </p>
+          <ul class="small text-secondary mb-0">
+            <li>Average warehouse inventory level ≈ <strong>300.4 units</strong></li>
+            <li>Average order fulfillment status ≈ <strong>60.1%</strong></li>
+            <li>Average delay probability ≈ <strong>70.0%</strong></li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="kpi-card p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-secondary small">Order Fulfillment</span>
+                <i class="bi bi-box-seam fs-5 text-success"></i>
+              </div>
+              <div id="kpi-ofs" class="kpi-value">60.1%</div>
+              <div class="small text-secondary">Average fulfillment status</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="kpi-card p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-secondary small">Delay Probability</span>
+                <i class="bi bi-clock-history fs-5 text-warning"></i>
+              </div>
+              <div id="kpi-delay" class="kpi-value">70.0%</div>
+              <div class="small text-secondary">Average delay probability</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="kpi-card p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-secondary small">High Risk Exposure</span>
+                <i class="bi bi-exclamation-octagon fs-5 text-danger"></i>
+              </div>
+              <div id="kpi-highrisk" class="kpi-value">74.6%</div>
+              <div class="small text-secondary">Rows flagged as High Risk</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row g-4 mt-1">
+      <div class="col-lg-6">
+        <div class="card-surface p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="section-title">Risk Classification Mix</span>
+            <span class="small text-secondary">
+              <i class="bi bi-graph-up me-1"></i>Count of rows by risk class
+            </span>
+          </div>
+          <canvas id="riskClassChart" height="200"></canvas>
+          <p class="small text-secondary mt-2 mb-0">
+            Counts (from the dataset): High Risk = 84,368 · Moderate Risk = 17,783 · Low Risk = 10,946
+          </p>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card-surface p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="section-title">Top 7 Risky Supplier Countries</span>
+            <span class="small text-secondary">
+              <i class="bi bi-exclamation-circle me-1"></i>Avg disruption likelihood score
+            </span>
+          </div>
+          <canvas id="supplierChart" height="200"></canvas>
+          <p class="small text-secondary mt-2 mb-0">
+            Based on average <code>disruption_likelihood_score</code> by supplier country.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="row g-4 mt-1 mb-4">
+      <div class="col-12">
+        <div class="card-surface p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="section-title">Sample – Highest Delay Probability Lanes</span>
+            <div class="small text-secondary">
+              <i class="bi bi-table me-1"></i>Top 10 rows where delay probability = 1.0
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm mb-0">
+              <thead>
+                <tr>
+                  <th>Product ID</th>
+                  <th>Supplier ID</th>
+                  <th>Supplier Country</th>
+                  <th>Delay Probability</th>
+                  <th>Route Risk Level</th>
+                  <th>Risk Classification</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- These 10 rows are hardcoded from the CSV snapshot -->
+                <tr>
+                  <td>P0296</td>
+                  <td>P0296_S1</td>
+                  <td>Ukraine</td>
+                  <td>100%</td>
+                  <td>8.34</td>
+                  <td>Low Risk</td>
+                </tr>
+                <tr>
+                  <td>P0296</td>
+                  <td>P0296_S2</td>
+                  <td>Jamaica</td>
+                  <td>100%</td>
+                  <td>8.34</td>
+                  <td>Low Risk</td>
+                </tr>
+                <tr>
+                  <td>P0296</td>
+                  <td>P0296_S3</td>
+                  <td>Portugal</td>
+                  <td>100%</td>
+                  <td>8.34</td>
+                  <td>Low Risk</td>
+                </tr>
+                <tr>
+                  <td>P0296</td>
+                  <td>P0296_S4</td>
+                  <td>Vietnam</td>
+                  <td>100%</td>
+                  <td>8.34</td>
+                  <td>Low Risk</td>
+                </tr>
+                <tr>
+                  <td>P0296</td>
+                  <td>P0296_S5</td>
+                  <td>Austria</td>
+                  <td>100%</td>
+                  <td>8.34</td>
+                  <td>Low Risk</td>
+                </tr>
+                <tr>
+                  <td>P0850</td>
+                  <td>P0850_S1</td>
+                  <td>Fiji</td>
+                  <td>100%</td>
+                  <td>1.96</td>
+                  <td>Low Risk</td>
+                </tr>
+                <tr>
+                  <td>P0850</td>
+                  <td>P0850_S2</td>
+                  <td>Romania</td>
+                  <td>100%</td>
+                  <td>1.96</td>
+                  <td>Low Risk</td>
+                </tr>
+                <tr>
+                  <td>P0850</td>
+                  <td>P0850_S3</td>
+                  <td>New Zealand</td>
+                  <td>100%</td>
+                  <td>1.96</td>
+                  <td>Low Risk</td>
+                </tr>
+                <tr>
+                  <td>P0943</td>
+                  <td>P0943_S1</td>
+                  <td>China</td>
+                  <td>100%</td>
+                  <td>3.69</td>
+                  <td>High Risk</td>
+                </tr>
+                <tr>
+                  <td>P0943</td>
+                  <td>P0943_S2</td>
+                  <td>Kazakhstan</td>
+                  <td>100%</td>
+                  <td>3.69</td>
+                  <td>High Risk</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small text-secondary mt-2 mb-0">
+            For a full, live view you can later replace this table with data bound directly to an API or an n8n-driven backend.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Hardcoded aggregated data from your CSV snapshot:
+
+    // Risk classification counts
+    const riskClassLabels = ["High Risk", "Moderate Risk", "Low Risk"];
+    const riskClassValues = [84368, 17783, 10946];
+
+    // Top 7 supplier countries by avg disruption likelihood score
+    const supplierLabels = [
+      "Ireland",
+      "Peru",
+      "Dominican Republic",
+      "Belgium",
+      "Guatemala",
+      "Papua New Guinea",
+      "Bolivia"
+    ];
+    const supplierAvgRisk = [0.828, 0.825, 0.825, 0.821, 0.821, 0.819, 0.819];
+
+    // Risk classification chart
+    const riskCtx = document.getElementById("riskClassChart").getContext("2d");
+    new Chart(riskCtx, {
+      type: "bar",
+      data: {
+        labels: riskClassLabels,
+        datasets: [
+          {
+            label: "Rows",
+            data: riskClassValues
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            ticks: { color: "#9ca3af" },
+            grid: { display: false }
+          },
+          y: {
+            ticks: { color: "#9ca3af" },
+            grid: { color: "#1f2937" }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: "#e5e7eb" }
+          }
+        }
+      }
+    });
+
+    // Supplier risk chart
+    const supplierCtx = document.getElementById("supplierChart").getContext("2d");
+    new Chart(supplierCtx, {
+      type: "bar",
+      data: {
+        labels: supplierLabels,
+        datasets: [
+          {
+            label: "Avg disruption likelihood",
+            data: supplierAvgRisk
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            ticks: { color: "#9ca3af" },
+            grid: { display: false }
+          },
+          y: {
+            ticks: { color: "#9ca3af" },
+            grid: { color: "#1f2937" }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: "#e5e7eb" }
+          }
+        }
+      }
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
